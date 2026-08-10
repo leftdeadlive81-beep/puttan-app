@@ -1,0 +1,8 @@
+{
+  "appId": "com.puttan.mobile",
+  "appName": "Puttan",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}

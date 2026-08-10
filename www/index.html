@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Puttan (GPS/クロノロジー)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================================================
+     ログイン画面
+================================================= -->
+<div id="authScreen">
+    <div class="authBox">
+        <h2>📡 Puttan</h2>
+        <p class="authSubtitle">GPS発信・クロノロジー専用アプリ</p>
+        <input id="loginUsername" placeholder="ログインID（英数字）" autocomplete="username">
+        <input id="loginPassword" type="password" placeholder="パスワード" autocomplete="current-password">
+        <button class="primaryButton" onclick="loginUser()">ログイン</button>
+        <div id="loginMessage" class="authMessage"></div>
+        <p class="authNote">アカウントの新規登録はWeb版のPuttanから行ってください。</p>
+    </div>
+</div>
+
+<!-- ================================================
+     メイン画面
+================================================= -->
+<div id="appScreen">
+
+    <div class="tabBar">
+        <button class="tabButton active" onclick="showTab('gpsTab', this)">
+            <span class="tabIcon">📡</span><span class="tabText">GPS</span>
+        </button>
+        <button class="tabButton" onclick="showTab('chronoTab', this)">
+            <span class="tabIcon">📋</span><span class="tabText">報連相</span>
+        </button>
+    </div>
+
+    <div id="gpsTab" class="tabContent active">
+        <div class="card">
+            <div class="sectionTitle">📡 GPS発信</div>
+            <div id="gpsStatus" class="gpsStatusBox">🔴 停止中</div>
+            <div id="lastSend" class="lastSendText">最終送信：-</div>
+            <button id="gpsToggleButton" class="primaryButton" onclick="toggleGps()">GPS開始</button>
+
+            <div id="backgroundWarning" class="backgroundWarning" style="display:none;">
+                ⚠️ バックグラウンド位置情報の許可が完了していません。画面OFF・アプリ切り替え中はGPSが止まる可能性があります。
+                <button class="linkButton" onclick="openAppSettings()">設定を開く</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="sectionTitle">👤 表示名</div>
+            <input id="displayName" placeholder="表示名">
+            <button class="secondaryButton" onclick="saveDisplayName()">保存</button>
+        </div>
+
+        <div class="card">
+            <div class="sectionTitle">🔐 アカウント</div>
+            <button class="dangerButton" onclick="logoutUser()">ログアウト</button>
+        </div>
+    </div>
+
+    <div id="chronoTab" class="tabContent">
+        <div class="card">
+            <div class="sectionTitle">📋 報連相</div>
+            <select id="chronoCategory">
+                <option value="報告">📢 報告</option>
+                <option value="連絡">📞 連絡</option>
+                <option value="相談">💬 相談</option>
+                <option value="緊急">🚨 緊急</option>
+                <option value="その他">📝 その他</option>
+            </select>
+            <input id="chronoMessage" placeholder="内容を入力">
+            <input id="chronoRemarks" placeholder="備考（任意）">
+            <button class="primaryButton" onclick="sendChronology()">送信</button>
+
+            <div id="timeline"></div>
+        </div>
+    </div>
+
+</div>
+
+<div id="reactionDetailOverlay" class="overlay">
+    <div class="overlayBox">
+        <div class="overlayTitle">リアクション詳細</div>
+        <div id="reactionDetailBody"></div>
+        <button class="secondaryButton" onclick="closeReactionDetail()">閉じる</button>
+    </div>
+</div>
+
+<script src="vendor/socket.io.min.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="vendor/proj4.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

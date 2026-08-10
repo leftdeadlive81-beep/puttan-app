@@ -1,0 +1,15 @@
+node_modules/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/.idea/
+android/captures/
+android/app/src/main/assets/public/
+android/app/google-services.json
+*.apk
+*.aab
+*.keystore
+*.jks
+.DS_Store
+Thumbs.db
