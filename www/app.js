@@ -694,6 +694,24 @@ function openAppSettings(){
    GPS送信
 ================================================== */
 
+function utmZoneNumber(lon){
+    return Math.floor((lon + 180) / 6) + 1;
+}
+
+function utmHemisphereLetter(lat){
+    return lat >= 0 ? "N" : "S";
+}
+
+function utmZoneLabel(lat, lon){
+    return utmZoneNumber(lon) + utmHemisphereLetter(lat);
+}
+
+function utmProjString(lat, lon){
+    const zone = utmZoneNumber(lon);
+    const south = lat < 0 ? " +south" : "";
+    return `+proj=utm +zone=${zone}${south} +datum=WGS84`;
+}
+
 function sendLocation(lat, lon){
     if(!currentAuthUser || !registered || !socketUserId){ return; }
     if(!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lon))){ return; }
@@ -703,7 +721,7 @@ function sendLocation(lat, lon){
 
     const utm = proj4(
         "EPSG:4326",
-        "+proj=utm +zone=52 +south +datum=WGS84",
+        utmProjString(lat, lon),
         [lon, lat]
     );
 
@@ -722,7 +740,7 @@ function sendLocation(lat, lon){
         display_name: name,
         lat: lat,
         lon: lon,
-        utmZone: "52S",
+        utmZone: utmZoneLabel(lat, lon),
         utmE: Math.round(utm[0]),
         utmN: Math.round(utm[1]),
         iconType: "1",
