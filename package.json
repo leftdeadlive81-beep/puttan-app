@@ -1,7 +1,7 @@
 {
   "name": "puttan-mobile",
   "version": "1.0.0",
-  "description": "Puttan - GPS location sharing + chronology (Android background tracking client)",
+  "description": "Puttan - full web app bundled for Android, with native background GPS tracking and push notifications",
   "private": true,
   "scripts": {
     "sync": "cap sync android",
