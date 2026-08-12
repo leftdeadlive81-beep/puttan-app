@@ -282,8 +282,7 @@ function registerSocketUser(){
         socket.emit("registerUser", {
             user_id: socketUserId,
             display_name: name,
-            account_name: name,
-            icon: "1"
+            account_name: name
         });
     });
 }
@@ -743,7 +742,6 @@ function sendLocation(lat, lon){
         utmZone: utmZoneLabel(lat, lon),
         utmE: Math.round(utm[0]),
         utmN: Math.round(utm[1]),
-        iconType: "1",
         device_id: getDeviceId()
     });
 }
