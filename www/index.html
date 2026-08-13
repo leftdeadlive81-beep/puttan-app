@@ -475,26 +475,47 @@ input, select {
     font-weight: bold;
     flex-shrink: 0;
 }
+.callPanelRow button.callPanelVideoButton { background: #6a1b9a; margin-left: 6px; }
 .callPanelEmpty { padding: 14px 4px; opacity: .7; font-size: 14px; text-align: center; }
 
 .callBox { max-width: 280px; }
+.callBox.videoActive { max-width: 420px; width: 92vw; }
 .callStatusText { font-size: 14px; opacity: .8; margin-bottom: 6px; }
 .callPeerName { font-size: 20px; font-weight: bold; margin-bottom: 4px; }
 .callDurationText { font-size: 15px; opacity: .85; margin-bottom: 16px; min-height: 20px; }
-.callButtonsRow { display: flex; gap: 10px; }
+.callVideoArea { display: none; position: relative; margin-bottom: 14px; border-radius: 10px; overflow: hidden; background: #000; }
+.callVideoArea.active { display: block; }
+.callRemoteVideo { width: 100%; max-height: 50vh; display: block; background: #000; object-fit: cover; }
+.callLocalVideo {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 30%;
+    max-width: 110px;
+    border-radius: 8px;
+    border: 2px solid white;
+    object-fit: cover;
+    background: #222;
+}
+.callButtonsRow { display: flex; flex-wrap: wrap; gap: 8px; }
 .callButtonsRow button {
-    flex: 1;
+    flex: 1 1 40%;
     border: none;
     border-radius: 6px;
-    padding: 12px;
-    font-size: 14px;
+    padding: 12px 6px;
+    font-size: 13px;
     font-weight: bold;
     color: white;
 }
 .callAcceptButton { background: #2e7d32; }
 .callRejectButton, .callHangupButton { background: #c62828; }
+.callButtonsRow button.callHangupButton { flex-basis: 100%; }
 .callMuteButton { background: #616161; }
 .callMuteButton.active { background: #ef6c00; }
+.callCameraButton { background: #616161; }
+.callCameraButton.active { background: #ef6c00; }
+.callSwitchCameraButton { background: #1976d2; }
+.callCaptureButton { background: #00897b; }
 #lastSend { text-align: center; padding: 4px; font-size: 13px; }
 .gpsStatusRow {
     display: flex;
@@ -607,7 +628,7 @@ input, select {
 
 .userHeader, .userRow {
     display: grid;
-    grid-template-columns: 48px minmax(70px, 1fr) minmax(70px, 1fr) 55px 65px 64px;
+    grid-template-columns: 48px minmax(70px, 1fr) minmax(70px, 1fr) 55px 65px 92px;
     align-items: center;
     gap: 3px;
 }
@@ -631,6 +652,7 @@ input, select {
 .deleteButton { border: none; background: transparent; font-size: 18px; }
 .userActionsCell { display: flex; justify-content: center; gap: 2px; }
 .historyButton { border: none; background: transparent; font-size: 16px; }
+.detailButton { border: none; background: transparent; font-size: 16px; }
 
 .confirmOverlay {
     display: none;
@@ -871,17 +893,23 @@ input, select {
 .templateReportOption { background: #546e7a; text-align: center; white-space: normal; }
 .templateReportEmergency { background: #d32f2f; }
 .handoverThreadBox {
-    max-width: 380px;
-    max-height: 85vh;
+    /* 視認性のため画面いっぱいに表示する */
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
     display: flex;
     flex-direction: column;
     text-align: left;
+    border-radius: 0;
+    box-sizing: border-box;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
 }
 .handoverThreadBox .reactionDetailTitle { text-align: center; }
 .handoverThreadList {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
-    max-height: 45vh;
     margin: 8px 0;
     padding-right: 4px;
 }
@@ -1026,6 +1054,40 @@ input, select {
 .popupFooter { padding-top: 6px; border-top: 1px solid #e0e0e0; text-align: center; }
 .popupFooter button { width: 100%; margin-top: 4px; }
 .popupUserId { font-size: 10px; color: #aaa; margin-top: 5px; word-break: break-all; }
+
+/* アプリ版のみ: 地図の隊員ポップアップ・地名表示ボックスを少し小さくする
+   （隊員一覧の「詳細」ボトムシートは対象外なので.leaflet-popup-content配下に限定） */
+html.native-app .leaflet-popup-content .popupCard { font-size: 11px; min-width: 180px; }
+html.native-app .leaflet-popup-content .popupHeader b { font-size: 13px; }
+html.native-app .leaflet-popup-content .popupOnline { font-size: 10px; }
+html.native-app .leaflet-popup-content .popupLabel { font-size: 11px; }
+html.native-app .leaflet-popup-content .popupLocation { font-size: 10px; }
+html.native-app .leaflet-popup-content .popupUserId { font-size: 9px; }
+html.native-app .utmCenterBox { font-size: 10px; padding: 3px 6px; }
+html.native-app #placeNameText { font-size: 11px; }
+
+/* 隊員一覧の「詳細」ボトムシート */
+.memberDetailOverlay { align-items: flex-end; }
+.memberDetailSheet {
+    background: var(--card-bg);
+    color: var(--text);
+    width: 100%;
+    max-width: 480px;
+    max-height: 75vh;
+    overflow-y: auto;
+    border-radius: 16px 16px 0 0;
+    padding: 10px 20px 20px;
+    box-sizing: border-box;
+}
+.memberDetailHandle {
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    margin: 0 auto 12px;
+}
+#memberDetailBody .popupCard { font-size: 14px; min-width: 0; }
+#memberDetailBody .popupHeader b { font-size: 17px; }
 
 .trafficIcon {
     background: #ff9800;
@@ -1403,6 +1465,14 @@ input, select {
     <button class="photoLightboxCloseButton" onclick="closePhotoLightbox()">✕</button>
 </div>
 
+<div id="memberDetailOverlay" class="confirmOverlay memberDetailOverlay" onclick="closeMemberDetail()">
+    <div class="memberDetailSheet" onclick="event.stopPropagation()">
+        <div class="memberDetailHandle"></div>
+        <div id="memberDetailBody"></div>
+        <button class="confirmBtnCancel reactionDetailCloseButton" onclick="closeMemberDetail()">閉じる</button>
+    </div>
+</div>
+
 <div id="historyOverlay" class="confirmOverlay" onclick="closeHistoryViewer()">
     <div class="confirmBox" onclick="event.stopPropagation()">
         <div class="reactionDetailTitle" id="historyUserName">🕒 移動履歴</div>
@@ -1510,11 +1580,14 @@ input, select {
 </div>
 
 <div id="callOverlay" class="confirmOverlay">
-    <div class="confirmBox callBox" onclick="event.stopPropagation()">
+    <div class="confirmBox callBox" id="callBox" onclick="event.stopPropagation()">
         <div class="callStatusText" id="callStatusText"></div>
         <div class="callPeerName" id="callPeerName">-</div>
         <div class="callDurationText" id="callDurationText"></div>
-        <audio id="callRemoteAudio" autoplay playsinline></audio>
+        <div class="callVideoArea" id="callVideoArea">
+            <video id="callRemoteVideo" class="callRemoteVideo" autoplay playsinline></video>
+            <video id="callLocalVideo" class="callLocalVideo" autoplay playsinline muted></video>
+        </div>
         <div class="callButtonsRow" id="callButtonsRow"></div>
     </div>
 </div>
@@ -1534,6 +1607,12 @@ input, select {
 
 const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 const SERVER_ORIGIN = isNativeApp ? "https://gps-server-p5ob.onrender.com" : "";
+
+// アプリ版だけの見た目調整（地図の隊員ポップアップ・地名表示ボックスの
+// 縮小など）はこのクラスを起点にCSSを分岐させる
+if(isNativeApp){
+    document.documentElement.classList.add("native-app");
+}
 
 /* ==================================================
    Supabase
@@ -4482,7 +4561,9 @@ function applyNavRoute(startLat, startLon, isReroute){
         drawNavRouteLine(route);
 
         const totalKm = (route.summary.totalDistance / 1000).toFixed(1);
-        const totalMin = Math.round(route.summary.totalTime / 60);
+        // ルーティングエンジンの所要時間は車移動前提のため、徒歩・現場条件を
+        // 見込んで常に3倍した時間を表示する
+        const totalMin = Math.round(route.summary.totalTime / 60 * 3);
 
         const highwayWarning = isAvoidHighwaysEnabled() && usesHighway;
 
@@ -4845,6 +4926,7 @@ function renderUsers(data){
                     ${timeAgo(user.lastUpdate)}
                 </div>
                 <div class="userActionsCell">
+                    <button class="detailButton" onclick="event.stopPropagation(); openMemberDetail('${safeUserId}')">📋</button>
                     <button class="historyButton" onclick="event.stopPropagation(); openHistoryViewer('${safeUserId}', '${safeName}')">🕒</button>
                     <button class="deleteButton" onclick="event.stopPropagation(); deleteUserById('${safeUserId}', '${safeName}')">🗑</button>
                 </div>
@@ -4913,6 +4995,99 @@ let historyRouteLayer = null;
 
 function jstDateString(date){
     return date.toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+}
+
+/* ==================================================
+   隊員一覧の「詳細」ボトムシート
+   ・地図ポップアップと同じ内容を、地図タブに切り替えなくても
+     隊員一覧タブから一目で確認できるようにする
+================================================== */
+
+function openMemberDetail(userId){
+    const user = latestUsersData[userId];
+    if(!user){ return; }
+
+    const body = document.getElementById("memberDetailBody");
+    if(!body){ return; }
+
+    const displayName = escapeHtml(user.display_name || user.name || userId);
+    const statusBadge = getStatusBadge(user);
+    const placeName = escapeHtml(getMemberPlaceName(user.lat, user.lon));
+
+    const concernRow = user.status_next
+        ? `
+            <div class="popupRow popupConcern">
+                <span class="popupLabel">⚠️ 懸念事項</span>
+                <span class="popupValue">${escapeHtml(user.status_next)}</span>
+            </div>
+          `
+        : "";
+
+    const navButton = (user.lat != null && user.lon != null)
+        ? `<button onclick="closeMemberDetail(); navigateToMemberFromDetail(${Number(user.lat)}, ${Number(user.lon)}, '${displayName}')">🧭 ここへナビ</button>`
+        : "";
+
+    body.innerHTML = `
+        <div class="popupCard">
+            <div class="popupHeader">
+                <b><span class="markerLevelBadge">Lv.${user.level ?? 1}</span> ${displayName}</b>
+                <span class="popupOnline ${statusBadge.cls}">${statusBadge.label}</span>
+            </div>
+
+            <div class="popupSection">
+                <div class="popupRow">
+                    <span class="popupLabel">📍 現在地</span>
+                    <span class="popupValue">${placeName}</span>
+                </div>
+                <div class="popupRow">
+                    <span class="popupLabel">🔋 バッテリー</span>
+                    <span class="popupValue">${formatBatteryLabel(user.battery, user.batteryCharging)}</span>
+                </div>
+                <div class="popupRow">
+                    <span class="popupLabel">🎖 経験値</span>
+                    <span class="popupValue">${Math.round(user.experience ?? 0)}</span>
+                </div>
+                <div class="popupRow">
+                    <span class="popupLabel">📋 活動内容</span>
+                    <span class="popupValue">${escapeHtml(user.status || "-")}</span>
+                </div>
+                <div class="popupRow">
+                    <span class="popupLabel">📍 目的地</span>
+                    <span class="popupValue">${escapeHtml(user.destination || "-")}</span>
+                </div>
+                ${concernRow}
+            </div>
+
+            <div class="popupSection popupGrid">
+                <div>💧水：${user.water ?? 0}</div>
+                <div>⛽燃料：${user.fuel ?? 0}</div>
+                <div>📦物資1：${escapeHtml(user.item_a || "-")}</div>
+                <div>📦物資2：${escapeHtml(user.item_b || "-")}</div>
+                <div>📦物資3：${escapeHtml(user.item_c || "-")}</div>
+                <div>📦物資4：${escapeHtml(user.item_d || "-")}</div>
+            </div>
+
+            <div class="popupFooter">
+                最終更新：${timeAgo(user.lastUpdate)}
+                ${navButton}
+                <div class="popupUserId">ID：${escapeHtml(userId)}</div>
+            </div>
+        </div>
+    `;
+
+    const overlay = document.getElementById("memberDetailOverlay");
+    if(overlay){ overlay.classList.add("active"); }
+}
+
+function closeMemberDetail(){
+    const overlay = document.getElementById("memberDetailOverlay");
+    if(overlay){ overlay.classList.remove("active"); }
+}
+
+function navigateToMemberFromDetail(lat, lon, name){
+    const mapButton = document.querySelector('.tabButton[onclick*="mapTab"]');
+    showTab("mapTab", mapButton);
+    startNavigation(lat, lon, name);
 }
 
 function openHistoryViewer(userId, name){
@@ -5834,6 +6009,63 @@ let callPendingIceCandidates = [];
 let callStartedAt = null;
 let callDurationTimer = null;
 let callMuted = false;
+let callHasVideo = false;
+let callIncomingHasVideo = false;
+let callCameraOff = false;
+let callFacingMode = "user";
+
+let incomingCallAudioCtx = null;
+let incomingCallAlertTimer = null;
+
+function playIncomingCallTone(){
+    try{
+        if(!incomingCallAudioCtx){
+            incomingCallAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const ctx = incomingCallAudioCtx;
+        if(ctx.state === "suspended"){ ctx.resume(); }
+
+        const now = ctx.currentTime;
+
+        // 「プルルル」を模した2連ビープ
+        [0, 0.35].forEach(offset => {
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+            oscillator.type = "sine";
+            oscillator.frequency.value = 880;
+            gain.gain.setValueAtTime(0.0001, now + offset);
+            gain.gain.exponentialRampToValueAtTime(0.3, now + offset + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.3);
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+            oscillator.start(now + offset);
+            oscillator.stop(now + offset + 0.32);
+        });
+    }
+    catch(error){
+        console.error("着信音再生エラー:", error);
+    }
+}
+
+function startIncomingCallAlert(){
+    stopIncomingCallAlert();
+
+    playIncomingCallTone();
+    if(navigator.vibrate){ navigator.vibrate([500, 300, 500, 300]); }
+
+    incomingCallAlertTimer = setInterval(() => {
+        playIncomingCallTone();
+        if(navigator.vibrate){ navigator.vibrate([500, 300, 500, 300]); }
+    }, 2000);
+}
+
+function stopIncomingCallAlert(){
+    if(incomingCallAlertTimer){
+        clearInterval(incomingCallAlertTimer);
+        incomingCallAlertTimer = null;
+    }
+    if(navigator.vibrate){ navigator.vibrate(0); }
+}
 
 function isCallSupported(){
     return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.RTCPeerConnection);
@@ -5866,7 +6098,15 @@ function openCallPanel(){
         list.innerHTML = others.map(id => {
             const user = latestUsersData[id];
             const name = escapeHtml(user.display_name || user.name || id);
-            return `<div class="callPanelRow"><span>${name}</span><button onclick="startOutgoingCall('${id}')">📞 発信</button></div>`;
+            return `
+                <div class="callPanelRow">
+                    <span>${name}</span>
+                    <span>
+                        <button onclick="startOutgoingCall('${id}', false)">📞 音声</button>
+                        <button class="callPanelVideoButton" onclick="startOutgoingCall('${id}', true)">📹 ビデオ</button>
+                    </span>
+                </div>
+            `;
         }).join("");
     }
 
@@ -5892,8 +6132,16 @@ function renderCallButtons(){
         row.innerHTML = `<button class="callHangupButton" onclick="hangUpCall()">✕ 発信を取り消す</button>`;
     }
     else if(callState === "connected"){
+        const videoButtons = callHasVideo
+            ? `
+                <button class="callCameraButton${callCameraOff ? " active" : ""}" onclick="toggleCallCamera()">${callCameraOff ? "📷 カメラOFF" : "📹 カメラON"}</button>
+                <button class="callSwitchCameraButton" onclick="switchCallCamera()">🔄 切替</button>
+                <button class="callCaptureButton" onclick="captureCallVideoToChronology()">📸 記録</button>
+              `
+            : "";
         row.innerHTML = `
             <button class="callMuteButton${callMuted ? " active" : ""}" onclick="toggleCallMute()">${callMuted ? "🔇 ミュート中" : "🎤 ミュート"}</button>
+            ${videoButtons}
             <button class="callHangupButton" onclick="hangUpCall()">📴 終了</button>
         `;
     }
@@ -5909,12 +6157,22 @@ function updateCallStatusUi(){
 
     if(statusElement){
         statusElement.textContent =
-            callState === "outgoing" ? "発信中…" :
-            callState === "incoming" ? "着信中…" :
+            callState === "outgoing" ? (callHasVideo ? "発信中（ビデオ）…" : "発信中…") :
+            callState === "incoming" ? (callIncomingHasVideo ? "着信中（ビデオ）…" : "着信中…") :
             callState === "connected" ? "通話中" : "";
     }
 
     renderCallButtons();
+}
+
+function updateCallVideoUi(){
+    const videoArea = document.getElementById("callVideoArea");
+    const localVideo = document.getElementById("callLocalVideo");
+    const callBox = document.getElementById("callBox");
+
+    if(videoArea){ videoArea.classList.toggle("active", callHasVideo); }
+    if(callBox){ callBox.classList.toggle("videoActive", callHasVideo); }
+    if(localVideo){ localVideo.srcObject = callHasVideo ? callLocalStream : null; }
 }
 
 function setCallOverlayStatus(text){
@@ -5959,8 +6217,10 @@ function createCallPeerConnection(){
     };
 
     pc.ontrack = event => {
-        const audio = document.getElementById("callRemoteAudio");
-        if(audio){ audio.srcObject = event.streams[0]; }
+        // 音声のみの通話でも同じ<video>要素で問題なく再生できるため、
+        // 音声用/映像用で要素を分けず共通で使う
+        const video = document.getElementById("callRemoteVideo");
+        if(video){ video.srcObject = event.streams[0]; }
     };
 
     pc.onconnectionstatechange = () => {
@@ -5977,21 +6237,42 @@ function createCallPeerConnection(){
     return pc;
 }
 
-async function startOutgoingCall(targetUserId){
+async function startOutgoingCall(targetUserId, withVideo){
     if(callState !== "idle"){ return; }
 
     closeCallPanel();
 
+    callFacingMode = "user";
+
     let stream;
+    let hasVideo = !!withVideo;
     try{
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: hasVideo ? { facingMode: callFacingMode } : false
+        });
     }
     catch(error){
-        alert("マイクを起動できませんでした：" + error.message);
-        return;
+        if(hasVideo){
+            // カメラが使えない場合は音声のみにフォールバックする
+            try{
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                hasVideo = false;
+            }
+            catch(error2){
+                alert("マイク・カメラを起動できませんでした：" + error2.message);
+                return;
+            }
+        }
+        else{
+            alert("マイクを起動できませんでした：" + error.message);
+            return;
+        }
     }
 
     callLocalStream = stream;
+    callHasVideo = hasVideo;
+    callCameraOff = false;
     callPeerUserId = targetUserId;
     callPeerName = (latestUsersData[targetUserId] && (latestUsersData[targetUserId].display_name || latestUsersData[targetUserId].name)) || targetUserId;
     callState = "outgoing";
@@ -5999,6 +6280,7 @@ async function startOutgoingCall(targetUserId){
 
     const overlay = document.getElementById("callOverlay");
     if(overlay){ overlay.classList.add("active"); }
+    updateCallVideoUi();
     updateCallStatusUi();
 
     callPeerConnection = createCallPeerConnection();
@@ -6010,6 +6292,7 @@ async function startOutgoingCall(targetUserId){
     socket.emit("callInvite", {
         toUserId: targetUserId,
         fromName: (currentProfile && currentProfile.display_name) || socketUserId,
+        video: callHasVideo,
         sdp: offer
     });
 }
@@ -6026,28 +6309,54 @@ socket.on("callInvite", data => {
     callPeerName = data.fromName || data.fromUserId;
     callPendingOfferSdp = data.sdp;
     callPendingIceCandidates = [];
+    callIncomingHasVideo = !!data.video;
     callState = "incoming";
     callMuted = false;
 
     const overlay = document.getElementById("callOverlay");
     if(overlay){ overlay.classList.add("active"); }
     updateCallStatusUi();
+    startIncomingCallAlert();
 });
 
 async function acceptIncomingCall(){
     if(callState !== "incoming" || !callPendingOfferSdp){ return; }
 
+    stopIncomingCallAlert();
+    callFacingMode = "user";
+
     let stream;
+    let hasVideo = callIncomingHasVideo;
     try{
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: hasVideo ? { facingMode: callFacingMode } : false
+        });
     }
     catch(error){
-        alert("マイクを起動できませんでした：" + error.message);
-        rejectIncomingCall();
-        return;
+        if(hasVideo){
+            try{
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                hasVideo = false;
+            }
+            catch(error2){
+                alert("マイク・カメラを起動できませんでした：" + error2.message);
+                rejectIncomingCall();
+                return;
+            }
+        }
+        else{
+            alert("マイクを起動できませんでした：" + error.message);
+            rejectIncomingCall();
+            return;
+        }
     }
 
     callLocalStream = stream;
+    callHasVideo = hasVideo;
+    callCameraOff = false;
+    updateCallVideoUi();
+
     callPeerConnection = createCallPeerConnection();
     callLocalStream.getTracks().forEach(track => callPeerConnection.addTrack(track, callLocalStream));
 
@@ -6137,8 +6446,114 @@ function toggleCallMute(){
     renderCallButtons();
 }
 
+function toggleCallCamera(){
+    if(!callLocalStream || !callHasVideo){ return; }
+    callCameraOff = !callCameraOff;
+    callLocalStream.getVideoTracks().forEach(track => { track.enabled = !callCameraOff; });
+    renderCallButtons();
+}
+
+/* ==================================================
+   ビデオ通話：イン/アウトカメラ切り替え
+   ・接続済みのRTCPeerConnectionにトラックを差し替えるだけなので
+     再ネゴシエーション（再度のofferSDP交換）は不要
+================================================== */
+
+async function switchCallCamera(){
+    if(!callLocalStream || !callHasVideo || !callPeerConnection){ return; }
+
+    const newFacingMode = callFacingMode === "user" ? "environment" : "user";
+
+    let newStream;
+    try{
+        newStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: newFacingMode }
+        });
+    }
+    catch(error){
+        console.error("カメラ切り替えエラー:", error);
+        alert("カメラを切り替えられませんでした：" + error.message);
+        return;
+    }
+
+    const newVideoTrack = newStream.getVideoTracks()[0];
+    if(!newVideoTrack){ return; }
+
+    const sender = callPeerConnection.getSenders().find(s => s.track && s.track.kind === "video");
+    if(sender){
+        try{ await sender.replaceTrack(newVideoTrack); }
+        catch(error){
+            console.error("映像トラック差し替えエラー:", error);
+            newVideoTrack.stop();
+            return;
+        }
+    }
+
+    const oldVideoTrack = callLocalStream.getVideoTracks()[0];
+    if(oldVideoTrack){
+        callLocalStream.removeTrack(oldVideoTrack);
+        oldVideoTrack.stop();
+    }
+
+    callLocalStream.addTrack(newVideoTrack);
+    newVideoTrack.enabled = !callCameraOff;
+    callFacingMode = newFacingMode;
+
+    const localVideo = document.getElementById("callLocalVideo");
+    if(localVideo){ localVideo.srcObject = callLocalStream; }
+}
+
+/* ==================================================
+   ビデオ通話：映っている映像をクロノロジーへ記録
+   ・相手側の映像（大きく表示されている方）を1枚キャプチャし、
+     既存のクロノロジー写真アップロードの仕組みにそのまま乗せる
+   ・本文には投稿者自身の現在のUTM座標を入れる
+================================================== */
+
+async function captureCallVideoToChronology(){
+    const video = document.getElementById("callRemoteVideo");
+    if(!video || !video.videoWidth){
+        alert("映像を取得できませんでした");
+        return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(async blob => {
+        if(!blob){
+            alert("画像の生成に失敗しました");
+            return;
+        }
+
+        const me = latestUsersData[socketUserId];
+        const utmText = (me && me.utmE != null && me.utmN != null)
+            ? `UTM ${me.utmZone || "52S"} E:${me.utmE} N:${me.utmN}`
+            : "UTM座標不明";
+
+        try{
+            const photoUrl = await uploadChronoPhoto(blob);
+
+            socket.emit("addChronology", {
+                message: utmText,
+                user: document.getElementById("name").value,
+                category: "報告",
+                remarks: "通話中のビデオより撮影",
+                photoUrl: photoUrl
+            });
+        }
+        catch(error){
+            console.error("通話映像の記録エラー:", error);
+            alert("クロノロジーへの投稿に失敗しました：" + error.message);
+        }
+    }, "image/jpeg", 0.85);
+}
+
 function resetCallState(){
     stopCallDurationTimer();
+    stopIncomingCallAlert();
 
     if(callPeerConnection){
         callPeerConnection.onicecandidate = null;
@@ -6153,8 +6568,15 @@ function resetCallState(){
         callLocalStream = null;
     }
 
-    const audio = document.getElementById("callRemoteAudio");
-    if(audio){ audio.srcObject = null; }
+    const remoteVideo = document.getElementById("callRemoteVideo");
+    if(remoteVideo){ remoteVideo.srcObject = null; }
+    const localVideo = document.getElementById("callLocalVideo");
+    if(localVideo){ localVideo.srcObject = null; }
+
+    const videoArea = document.getElementById("callVideoArea");
+    if(videoArea){ videoArea.classList.remove("active"); }
+    const callBox = document.getElementById("callBox");
+    if(callBox){ callBox.classList.remove("videoActive"); }
 
     callState = "idle";
     callPeerUserId = null;
@@ -6162,6 +6584,10 @@ function resetCallState(){
     callPendingOfferSdp = null;
     callPendingIceCandidates = [];
     callMuted = false;
+    callHasVideo = false;
+    callIncomingHasVideo = false;
+    callCameraOff = false;
+    callFacingMode = "user";
 
     const overlay = document.getElementById("callOverlay");
     if(overlay){ overlay.classList.remove("active"); }
