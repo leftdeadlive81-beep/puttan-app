@@ -1924,13 +1924,7 @@ function triggerNyaEasterEgg(logoElement){
     }
 
     try{
-        if("speechSynthesis" in window){
-            const utterance = new SpeechSynthesisUtterance("にゃー");
-            utterance.lang = "ja-JP";
-            utterance.pitch = 1.6;
-            utterance.rate = 1.1;
-            speechSynthesis.speak(utterance);
-        }
+        speakJa("にゃー", { pitch: 1.6, rate: 1.1 });
     }
     catch(err){
         console.error("鳴き声再生エラー:", err);
@@ -4418,11 +4412,38 @@ function navInstructionText(instruction){
     return NAV_INSTRUCTION_JA[instruction.type] || "直進";
 }
 
-function speakJa(text){
+// Puttan Mobile(Capacitor)アプリ内のWebViewはWeb Speech API
+// (window.speechSynthesis)が音を出さないことがあるため、アプリ内では
+// ネイティブのTTSプラグインを使う。ブラウザ版は従来どおりWeb Speech APIを使う
+function cancelSpeech(){
+    if(isNativeApp && window.Capacitor.Plugins.TextToSpeech){
+        window.Capacitor.Plugins.TextToSpeech.stop().catch(() => {});
+        return;
+    }
+    if("speechSynthesis" in window){
+        window.speechSynthesis.cancel();
+    }
+}
+
+function speakJa(text, options){
+    cancelSpeech();
+
+    if(isNativeApp && window.Capacitor.Plugins.TextToSpeech){
+        window.Capacitor.Plugins.TextToSpeech.speak({
+            text: text,
+            lang: "ja-JP",
+            rate: (options && options.rate) || 1.0,
+            pitch: (options && options.pitch) || 1.0,
+            queueStrategy: 0 // QueueStrategy.Flush
+        }).catch(error => console.error("音声案内エラー:", error));
+        return;
+    }
+
     if(!("speechSynthesis" in window)){ return; }
-    window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = "ja-JP";
+    if(options && options.rate){ utter.rate = options.rate; }
+    if(options && options.pitch){ utter.pitch = options.pitch; }
     window.speechSynthesis.speak(utter);
 }
 
@@ -4702,9 +4723,7 @@ function stopNavigation(){
         map.removeLayer(navRouteLine);
         navRouteLine = null;
     }
-    if("speechSynthesis" in window){
-        window.speechSynthesis.cancel();
-    }
+    cancelSpeech();
 
     navRoute = null;
     navSteps = [];
