@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Puttan Version 2.69</title>
+<title>Puttan Version 2.70</title>
 
 <link rel="icon" type="image/png" href="/icon.png">
 <link rel="apple-touch-icon" href="/icon.png">
@@ -307,7 +307,6 @@ input, select {
 }
 
 .logoutButton { background: #f57c00; }
-.gpsStopSettingsButton { background: #c62828; }
 .backgroundGpsWarning {
     margin-top: 10px;
     padding: 10px;
@@ -439,7 +438,7 @@ input, select {
 .navSummaryText { font-size: 12px; opacity: .85; margin-top: 2px; }
 
 .gpsButtonRow { display: flex; gap: 6px; margin-top: 7px; }
-.gpsButton, .reportButton, .callButton, .templateButton, .handoverButton {
+.reportButton, .callButton, .gpsToggleMapButton, .handoverButton {
     flex: 1;
     padding: 10px 4px;
     border: none;
@@ -447,11 +446,11 @@ input, select {
     color: white;
     font-size: 14px;
 }
-.gpsButton { background: #388e3c; }
 .reportButton { background: #1976d2; }
-.templateButton { background: #00897b; }
 .handoverButton { background: #8d6e63; }
 .callButton { background: #2e7d32; }
+.gpsToggleMapButton { background: #616161; }
+.gpsToggleMapButton.gpsToggleMapButtonOn { background: #388e3c; }
 .arSettingsButton { background: #6a1b9a; }
 
 /* 1:1音声通話 */
@@ -1264,8 +1263,8 @@ input, select {
         </div>
 
         <div class="gpsButtonRow">
+            <button id="gpsToggleMapButton" class="gpsToggleMapButton" onclick="toggleGpsFromMap()">📡 GPS OFF</button>
             <button class="reportButton" onclick="openStatusReportPanel()">報告</button>
-            <button class="templateButton" onclick="openTemplateReportPanel()">定型</button>
             <button class="handoverButton" onclick="openHandoverList()">引継</button>
             <button class="callButton" onclick="openCallPanel()">電話</button>
         </div>
@@ -1325,6 +1324,10 @@ input, select {
     <div id="settingsTab" class="tabContent">
 
         <div class="card settingsCard">
+            <button class="settingsButton logoutButton" onclick="logoutUser()">🚪 ログアウト</button>
+        </div>
+
+        <div class="card settingsCard">
             <div class="sectionTitle">🌙 表示設定</div>
             <button id="darkModeToggleButton" class="settingsButton" onclick="toggleDarkMode()">🌙 ダークモードにする</button>
         </div>
@@ -1362,14 +1365,10 @@ input, select {
             <button class="settingsButton" onclick="changePassword(this)">🔑 パスワードを変更</button>
             <div id="changePasswordStatus"></div>
 
-            <button class="settingsButton gpsButton" onclick="startGPS()">📡 GPS開始</button>
-            <button class="settingsButton gpsStopSettingsButton" onclick="stopGPS()">🛑 GPS停止</button>
-
             <div id="backgroundGpsWarning" class="backgroundGpsWarning" style="display:none;">
                 ⚠️ バックグラウンド位置情報の許可が完了していません。画面OFF・アプリ切り替え中はGPSが止まる可能性があります。
                 <button class="linkButton" onclick="openAppSettings()">端末の設定を開く</button>
             </div>
-            <button class="settingsButton logoutButton" onclick="logoutUser()">🚪 ログアウト</button>
         </div>
 
         <div class="card settingsCard">
@@ -1418,6 +1417,11 @@ input, select {
     <div class="confirmBox statusReportBox" onclick="event.stopPropagation()">
         <div class="reactionDetailTitle">🔄 現在地報告</div>
 
+        <div class="sectionTitle">⚡ 定型文で報告（入力不要）</div>
+        <button class="settingsButton templateReportOption" onclick="sendTemplateReport(0)">✅ 人員・装備・車両等異状なし</button>
+        <button class="settingsButton templateReportOption" onclick="sendTemplateReport(1)">⏸ 回答保留、確認して連絡する</button>
+        <button class="settingsButton templateReportOption templateReportEmergency" onclick="sendTemplateReport(2)">🚨 緊急事態発生　応援を求む</button>
+
         <div class="sectionTitle">👤 使用者情報</div>
         <div class="inputRow">
             <input id="name" value="隊員A" placeholder="表示名">
@@ -1451,16 +1455,6 @@ input, select {
 
         <button id="statusReportSubmitButton" class="settingsButton" onclick="submitStatusReport(this)">🔄 報告する</button>
         <button class="confirmBtnCancel reactionDetailCloseButton" onclick="closeStatusReportPanel()">閉じる</button>
-    </div>
-</div>
-
-<div id="templateReportOverlay" class="confirmOverlay" onclick="closeTemplateReportPanel()">
-    <div class="confirmBox" onclick="event.stopPropagation()">
-        <div class="reactionDetailTitle">📋 定型文報告</div>
-        <button class="settingsButton templateReportOption" onclick="sendTemplateReport(0)">✅ 人員・装備・車両等異状なし</button>
-        <button class="settingsButton templateReportOption" onclick="sendTemplateReport(1)">⏸ 回答保留、確認して連絡する</button>
-        <button class="settingsButton templateReportOption templateReportEmergency" onclick="sendTemplateReport(2)">🚨 緊急事態発生　応援を求む</button>
-        <button class="confirmBtnCancel reactionDetailCloseButton" onclick="closeTemplateReportPanel()">キャンセル</button>
     </div>
 </div>
 
@@ -1578,6 +1572,7 @@ let chronology = [];
 let olderChronology = [];
 let chronologyExhausted = false;
 let watchID = null;
+let gpsRunning = false;
 let pushNotificationsInitialized = false;
 
 let navRouteLine = null;
@@ -3088,7 +3083,7 @@ async function updatePlaceName(){
 
     try{
         const response = await fetch(
-            `/api/reverse-geocode?lat=${center.lat}&lon=${center.lng}`
+            `${SERVER_ORIGIN}/api/reverse-geocode?lat=${center.lat}&lon=${center.lng}`
         );
         const data = await response.json();
 
@@ -3299,6 +3294,8 @@ async function startGPS(){
 
 function startGPSCore(){
     localStorage.setItem("gpsRunning", "true");
+    gpsRunning = true;
+    updateGpsToggleMapButton();
 
     if(getBackgroundGeolocationPlugin()){
         startBackgroundGPSTracking();
@@ -3618,9 +3615,32 @@ function stopGPS(){
     lastSendTime = 0;
 
     localStorage.removeItem("gpsRunning");
+    gpsRunning = false;
+    updateGpsToggleMapButton();
 
     const status = document.getElementById("gpsStatus");
     if(status){ status.innerHTML = "🔴 GPS停止中"; }
+}
+
+/* ==================================================
+   地図タブのGPS ON/OFFボタン
+================================================== */
+
+function toggleGpsFromMap(){
+    if(gpsRunning){
+        stopGPS();
+    }
+    else{
+        startGPS();
+    }
+}
+
+function updateGpsToggleMapButton(){
+    const button = document.getElementById("gpsToggleMapButton");
+    if(!button){ return; }
+
+    button.textContent = gpsRunning ? "📡 GPS ON" : "📡 GPS OFF";
+    button.classList.toggle("gpsToggleMapButtonOn", gpsRunning);
 }
 
 /* ==================================================
@@ -3734,7 +3754,7 @@ async function submitStatusReport(button){
 }
 
 /* ==================================================
-   定型文ワンタップ報告
+   定型文ワンタップ報告（現在地報告パネルに統合）
    ・緊急時に文字入力せず、選択式の定型メッセージを
      クロノロジーへ即送信する
 ================================================== */
@@ -3744,21 +3764,6 @@ const REPORT_TEMPLATES = [
     { category: "連絡", message: "回答保留、確認して連絡する" },
     { category: "緊急", message: "緊急事態発生　応援を求む" }
 ];
-
-function openTemplateReportPanel(){
-    if(!currentAuthUser){
-        alert("先にログインしてください");
-        return;
-    }
-
-    const overlay = document.getElementById("templateReportOverlay");
-    if(overlay){ overlay.classList.add("active"); }
-}
-
-function closeTemplateReportPanel(){
-    const overlay = document.getElementById("templateReportOverlay");
-    if(overlay){ overlay.classList.remove("active"); }
-}
 
 function sendTemplateReport(index){
     const template = REPORT_TEMPLATES[index];
@@ -3772,7 +3777,7 @@ function sendTemplateReport(index){
         photoUrl: ""
     });
 
-    closeTemplateReportPanel();
+    closeStatusReportPanel();
 }
 
 /* ==================================================
@@ -6245,7 +6250,7 @@ function showTab(tabId, button){
 ================================================== */
 
 window.addEventListener("load", async () => {
-    console.log("Version 2.69 起動");
+    console.log("Version 2.70 起動");
 
     try{
         const { data, error } = await supabaseClient.auth.getSession();

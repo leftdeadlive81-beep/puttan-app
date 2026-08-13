@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>P.U.T.T.A.N. Version 2.69 操作マニュアル</title>
+<title>P.U.T.T.A.N. Version 2.70 操作マニュアル</title>
 <style>
 
 /* =========================================================
@@ -175,7 +175,7 @@ footer { text-align: center; color: #666; font-size: 12px; padding: 20px 10px 30
 
 <header>
     <h1>🐈 P.U.T.T.A.N.</h1>
-    <p>野外活動支援ツール　Version 2.69 操作マニュアル</p>
+    <p>野外活動支援ツール　Version 2.70 操作マニュアル</p>
 </header>
 
 <div class="container">
@@ -259,22 +259,21 @@ footer { text-align: center; color: #666; font-size: 12px; padding: 20px 10px 30
 <p>
     ログイン・アカウント登録すると、自分の位置情報が自動的にサーバーへ送信され始め、
     他の隊員の地図にも表示されるようになります。10m移動するか30秒経過するたびに、
-    位置情報が自動的に更新されます。何らかの理由で自動開始しなかった場合は、
-    設定タブの「📡 GPS開始」で手動開始できます。位置情報の送信を止めたい場合は、
-    同じ設定タブの「🛑 GPS停止」で手動停止できます（ログアウトはせず、位置情報の送信だけを止めます）。
+    位置情報が自動的に更新されます。
+</p>
+<p>
+    地図タブ左端の「📡 GPS OFF／📡 GPS ON」ボタンでいつでも手動でON/OFFを切り替えられます
+    （ログアウトはせず、位置情報の送信だけを止めます）。
 </p>
 <p>
     GPS状態表示の左側には、現在ログイン中のアカウントID（ログインID）が表示されます。複数端末を使い分ける際の確認に使えます。
     右側には今日の月齢が表示されます。
 </p>
 <p>
-    「報告」を押すと、表示名・アイコン・活動内容・次の目的地・懸念事項・
-    水/燃料の残量・物資1〜4をまとめて入力する画面が開きます。「🔄 報告する」を押すと、
-    入力内容の保存とその場での位置情報送信が1回でまとめて行われます。
-</p>
-<p>
-    「定型」を押すと、文字入力なしでワンタップ送信できる定型メッセージを選べます。
-    選ぶとすぐにクロノロジーへ投稿されます。
+    「報告」を押すと、文字入力なしでワンタップ送信できる定型メッセージ、または
+    表示名・アイコン・活動内容・次の目的地・懸念事項・水/燃料の残量・物資1〜4をまとめて
+    入力する画面が開きます。定型メッセージは選ぶとすぐにクロノロジーへ投稿されます。
+    「🔄 報告する」を押すと、入力内容の保存とその場での位置情報送信が1回でまとめて行われます。
 </p>
 <ul class="plain">
     <li>✅ 人員・装備・車両等異状なし（報告）</li>
@@ -399,6 +398,12 @@ footer { text-align: center; color: #666; font-size: 12px; padding: 20px 10px 30
 <div class="card" id="settings">
 <h2>⚙️ 6. 登録・設定タブ</h2>
 
+<h3>🚪 ログアウト</h3>
+<p>
+    タブの一番上にあります。ログアウトしてもプロフィールや物資情報などのデータは保持され、
+    次回ログイン時に復元されます。
+</p>
+
 <h3>🌙 表示設定</h3>
 <p>「🌙 ダークモードにする」ボタンで、夜間の目の負担軽減・バッテリー節約向けの暗い配色に切り替えられます。設定は端末に保存され、次回起動時も維持されます。</p>
 
@@ -433,7 +438,6 @@ footer { text-align: center; color: #666; font-size: 12px; padding: 20px 10px 30
 
 <h3>🔐 アカウント</h3>
 <p>新しいパスワードを2回入力し「🔑 パスワードを変更」を押すと、ログインパスワードを変更できます。</p>
-<p>ログアウトできます。ログアウトしてもプロフィールや物資情報などのデータは保持され、次回ログイン時に復元されます。</p>
 </div>
 
 <!-- 7. スマホアプリ版 -->
@@ -445,7 +449,7 @@ footer { text-align: center; color: #666; font-size: 12px; padding: 20px 10px 30
     クロノロジー投稿のプッシュ通知にも対応しています。
 </p>
 <p style="text-align:center;">
-    <a href="https://github.com/leftdeadlive81-beep/puttan-app/releases/download/2.69/puttan269.apk"
+    <a href="https://github.com/leftdeadlive81-beep/puttan-app/releases/download/2.70/puttan270.apk"
        style="display:inline-block; padding:11px 22px; background:#1f4e79; color:white; text-decoration:none; border-radius:8px; font-weight:bold;">
         ⬇️ Puttan Mobile（Android）をダウンロード
     </a>
@@ -586,6 +590,13 @@ footer { text-align: center; color: #666; font-size: 12px; padding: 20px 10px 30
         設定タブにGPS停止ボタンを追加<br>
         Version 2.69に更新
     </td></tr>
+    <tr><td>8月13日</td><td>
+        Puttan Mobileアプリを刷新し、Web版と同じ全機能（地図・AR・通話・引き継ぎメモ等）に対応<br>
+        アプリ内での地名取得失敗の不具合を修正（サーバーのAPI呼び出しにCORS設定を追加）<br>
+        「定型」を「報告」パネルに統合し、地図タブに「📡 GPS ON/OFF」の切り替えボタンを新設<br>
+        設定タブのGPS開始/停止ボタンを削除（地図タブのボタンに一本化）、ログアウトボタンを設定タブの先頭に移動<br>
+        Version 2.70に更新
+    </td></tr>
 </table>
 </div>
 
@@ -596,7 +607,7 @@ footer { text-align: center; color: #666; font-size: 12px; padding: 20px 10px 30
 </div>
 
 <footer>
-    P.U.T.T.A.N. Version 2.69<br>
+    P.U.T.T.A.N. Version 2.70<br>
     © 2026
 </footer>
 
