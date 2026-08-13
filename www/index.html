@@ -1645,6 +1645,7 @@ let currentProfile = null;
 let socketUserId = null;
 let registered = false;
 let markers = {};
+let followedUserId = null;
 let pointMarkers = {};
 let latestUsersData = {};
 let chronology = [];
@@ -4716,6 +4717,34 @@ function stopNavigation(){
 }
 
 /* ==================================================
+   隊員アイコンをタップした際の追従表示
+   ・タップした隊員が移動するたびその位置へ地図を追従させる
+   ・地図の空白部分や他のマーカー（ポップアップが開くもの全般）を
+     タップ、または手動で地図をドラッグすると解除する
+================================================== */
+
+function startFollowingUser(userId){
+    followedUserId = userId;
+    const marker = markers[userId];
+    if(marker){
+        map.panTo(marker.getLatLng(), { animate: true });
+    }
+}
+
+function stopFollowingUser(){
+    followedUserId = null;
+}
+
+map.on("click", stopFollowingUser);
+map.on("dragstart", stopFollowingUser);
+map.on("popupopen", event => {
+    const followedMarker = followedUserId ? markers[followedUserId] : null;
+    if(event.popup._source !== followedMarker){
+        stopFollowingUser();
+    }
+});
+
+/* ==================================================
    隊員マーカー描画（初期同期・差分更新の共通処理）
 ================================================== */
 
@@ -4727,6 +4756,7 @@ function renderUserMarker(userId, user){
             memberLayerGroup.removeLayer(markers[userId]);
             delete markers[userId];
         }
+        if(followedUserId === userId){ stopFollowingUser(); }
         return;
     }
 
@@ -4747,6 +4777,12 @@ function renderUserMarker(userId, user){
             [lat, lon],
             { icon: createIcon(user.icon || user.iconType || "1") }
         ).addTo(memberLayerGroup);
+
+        markers[userId].on("click", () => startFollowingUser(userId));
+    }
+
+    if(userId === followedUserId){
+        map.panTo([lat, lon], { animate: true });
     }
 
     markers[userId].setIcon(createIcon(user.icon || user.iconType || "1"));
@@ -4839,6 +4875,7 @@ socket.on("locations", data => {
                 memberLayerGroup.removeLayer(markers[userId]);
             }
             delete markers[userId];
+            if(followedUserId === userId){ stopFollowingUser(); }
         }
     });
 
